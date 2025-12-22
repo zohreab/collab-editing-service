@@ -11,6 +11,86 @@ It is designed using a **microservice-based architecture** and demonstrates real
 The system enables multiple users to collaboratively edit documents in real time while maintaining full version history and fine-grained access control.
 
 ---
+## User Interface 
+
+
+
+### Register Page
+
+<img width="1889" height="829" alt="Register Page" src="https://github.com/user-attachments/assets/2eeaadb1-44f2-4bed-966a-0e2de0ca77a4" />
+
+---
+
+### Login Page
+
+<img width="1874" height="807" alt="Login Page" src="https://github.com/user-attachments/assets/af3857cd-695f-4e07-8b6d-978d0a547c7f" />
+
+---
+
+### Dashboard Page
+
+<img width="1803" height="707" alt="Dashboard Page" src="https://github.com/user-attachments/assets/7e1e8cf8-0eb8-4feb-93c6-a5f8487b212d" />
+
+---
+
+### Change Password
+
+<img width="1814" height="802" alt="Change Password" src="https://github.com/user-attachments/assets/daae0f55-d05e-47d0-8b13-39da388b7f00" />
+
+---
+
+### Create Document
+
+<img width="1887" height="783" alt="Create Document" src="https://github.com/user-attachments/assets/f92708e8-96ab-47ed-a6ea-cbcf30a7941c" />
+
+---
+
+### Share Document
+
+<img width="1885" height="782" alt="Share Document" src="https://github.com/user-attachments/assets/420a75be-2375-4f46-9754-70dc6acc0b83" />
+
+<img width="1888" height="792" alt="Share Document 2" src="https://github.com/user-attachments/assets/3c17bbe4-ce9f-4f16-a343-26d13fe6d225" />
+
+---
+
+### Document Shared With Another User
+
+<img width="1845" height="764" alt="Shared Document" src="https://github.com/user-attachments/assets/dd54c30d-d996-47d0-8acb-4beba02358a2" />
+
+---
+
+### Collaborative Editing
+
+<img width="1863" height="802" alt="Collab Editing 1" src="https://github.com/user-attachments/assets/03ee3e8b-46b8-42de-b2a4-88e012f38ca2" />
+
+<img width="1862" height="790" alt="Collab Editing 2" src="https://github.com/user-attachments/assets/af7fc641-fd75-471d-8bf7-185e6f4949fd" />
+
+---
+
+### Version History
+
+<img width="1840" height="791" alt="Version History" src="https://github.com/user-attachments/assets/ff32cc7c-e8a4-4c8b-af64-eb31a507c53d" />
+
+---
+
+### Deleting the Document
+
+<img width="1845" height="781" alt="Delete Document" src="https://github.com/user-attachments/assets/50d82623-772e-44c9-aa40-1201a113ef88" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
 
 ## System Architecture
 
@@ -189,84 +269,5 @@ http://localhost:5173
 
 ---
 
-## User Interface 
-
-
-
-### Register Page
-
-<img width="1889" height="829" alt="Register Page" src="https://github.com/user-attachments/assets/2eeaadb1-44f2-4bed-966a-0e2de0ca77a4" />
-
----
-
-### Login Page
-
-<img width="1874" height="807" alt="Login Page" src="https://github.com/user-attachments/assets/af3857cd-695f-4e07-8b6d-978d0a547c7f" />
-
----
-
-### Dashboard Page
-
-<img width="1803" height="707" alt="Dashboard Page" src="https://github.com/user-attachments/assets/7e1e8cf8-0eb8-4feb-93c6-a5f8487b212d" />
-
----
-
-### Change Password
-
-<img width="1814" height="802" alt="Change Password" src="https://github.com/user-attachments/assets/daae0f55-d05e-47d0-8b13-39da388b7f00" />
-
----
-
-### Create Document
-
-<img width="1887" height="783" alt="Create Document" src="https://github.com/user-attachments/assets/f92708e8-96ab-47ed-a6ea-cbcf30a7941c" />
-
----
-
-### Share Document
-
-<img width="1885" height="782" alt="Share Document" src="https://github.com/user-attachments/assets/420a75be-2375-4f46-9754-70dc6acc0b83" />
-
-<img width="1888" height="792" alt="Share Document 2" src="https://github.com/user-attachments/assets/3c17bbe4-ce9f-4f16-a343-26d13fe6d225" />
-
----
-
-### Document Shared With Another User
-
-<img width="1845" height="764" alt="Shared Document" src="https://github.com/user-attachments/assets/dd54c30d-d996-47d0-8acb-4beba02358a2" />
-
----
-
-### Collaborative Editing
-
-<img width="1863" height="802" alt="Collab Editing 1" src="https://github.com/user-attachments/assets/03ee3e8b-46b8-42de-b2a4-88e012f38ca2" />
-
-<img width="1862" height="790" alt="Collab Editing 2" src="https://github.com/user-attachments/assets/af7fc641-fd75-471d-8bf7-185e6f4949fd" />
-
----
-
-### Version History
-
-<img width="1840" height="791" alt="Version History" src="https://github.com/user-attachments/assets/ff32cc7c-e8a4-4c8b-af64-eb31a507c53d" />
-
----
-
-### Deleting the Document
-
-<img width="1845" height="781" alt="Delete Document" src="https://github.com/user-attachments/assets/50d82623-772e-44c9-aa40-1201a113ef88" />
-
-
-
-
-
-
-
-
-
-
-
-
-
----
 
 
