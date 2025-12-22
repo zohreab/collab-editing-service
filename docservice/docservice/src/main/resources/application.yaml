@@ -1,0 +1,39 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: docservice
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/collab_db
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        # This part is crucial for handling large text strings in Postgres
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+  h2:
+    console:
+      enabled: false
+
+logging:
+  level:
+    org.springframework.web: INFO
+
+services:
+  userservice:
+    baseUrl: http://localhost:8081
+  versionservice:
+    baseUrl: http://localhost:8083

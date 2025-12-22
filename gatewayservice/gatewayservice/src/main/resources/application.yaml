@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: gatewayservice
+  cloud:
+    gateway:
+      default-filters:
+        - name: DedupeResponseHeader
+          args:
+            strategies: RETAIN_FIRST
+            name: Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+      routes:
+        - id: userservice
+          uri: http://localhost:8081
+          predicates:
+            - Path=/users/**
+          filters:
+            - ModifyHeaderFilter
+
+        - id: docservice-ws
+          uri: http://localhost:8082
+          predicates:
+            - Path=/ws-docs/**
+          filters:
+            - ModifyHeaderFilter
+
+        - id: docservice
+          uri: http://localhost:8082
+          predicates:
+            - Path=/docs/**
+          filters:
+            - ModifyHeaderFilter
+
+        - id: versionservice
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/versions/**
+          filters:
+            - ModifyHeaderFilter
+
+      # NEW LOCATION FOR CORS IN SPRING BOOT 3.5.x
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "http://localhost:5173"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
