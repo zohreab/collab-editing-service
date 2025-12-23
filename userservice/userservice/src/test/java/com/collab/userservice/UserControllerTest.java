@@ -1,6 +1,7 @@
 package com.collab.userservice;
 
-import com.collab.userservice.dto.*;
+import com.collab.userservice.dto.LoginRequest;
+import com.collab.userservice.dto.RegisterRequest;
 import com.collab.userservice.model.User;
 import com.collab.userservice.security.JwtUtils;
 import com.collab.userservice.service.UnauthorizedException;
@@ -12,8 +13,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -21,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(ApiExceptionHandler.class)
+@TestPropertySource(properties = {
+        "internal.secret=test-secret",
+        "services.docservice.baseUrl=http://localhost:8082"
+})
 class UserControllerTest {
 
     @Autowired
@@ -31,6 +39,10 @@ class UserControllerTest {
 
     @MockBean
     private JwtUtils jwtUtils;
+
+    // UserController needs this now (for calling docservice on delete)
+    @MockBean
+    private RestTemplate restTemplate;
 
     // ---------- REGISTER ----------
 
@@ -48,6 +60,34 @@ class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("z"))
                 .andExpect(jsonPath("$.email").value("z@x.com"));
+    }
+
+    @Test
+    void register_usernameExists_returns400() throws Exception {
+        when(users.register(any())).thenThrow(new IllegalArgumentException("username already exists"));
+
+        mvc.perform(post("/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"taken\",\"email\":\"a@b.com\",\"password\":\"p\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("bad_request"))
+                .andExpect(jsonPath("$.message").value("username already exists"));
+    }
+
+    @Test
+    void register_invalidInput_returns400() throws Exception {
+        mvc.perform(post("/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"\",\"email\":\"not-an-email\",\"password\":\"\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void register_invalidEmail_returns400() throws Exception {
+        mvc.perform(post("/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"z\",\"email\":\"not-an-email\",\"password\":\"pw\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     // ---------- LOGIN ----------
@@ -70,6 +110,14 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("z@x.com"));
     }
 
+    @Test
+    void login_emptyFields_returns400() throws Exception {
+        mvc.perform(post("/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"\",\"password\":\"\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
     // ---------- UPDATE PROFILE ----------
 
     @Test
@@ -86,6 +134,15 @@ class UserControllerTest {
                         .content("{\"email\":\"new@x.com\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("new@x.com"));
+    }
+
+    @Test
+    void updateProfile_invalidEmail_returns400() throws Exception {
+        mvc.perform(put("/users/me")
+                        .header("X-User", "z")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"invalid-email\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     // ---------- CHANGE PASSWORD ----------
@@ -126,6 +183,7 @@ class UserControllerTest {
                 .andExpect(content().string("true"));
     }
 
+    // ---------- ME ----------
 
     @Test
     void me_returnsUserResponse() throws Exception {
@@ -137,58 +195,20 @@ class UserControllerTest {
 
         mvc.perform(get("/users/me").header("X-User", "z"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("z"));
+                .andExpect(jsonPath("$.username").value("z"))
+                .andExpect(jsonPath("$.email").value("z@x.com"));
     }
 
-    @Test
-    void register_usernameExists_returns400() throws Exception {
-        // This triggers handleBadRequest in ApiExceptionHandler
-        when(users.register(any())).thenThrow(new IllegalArgumentException("username already exists"));
-
-        mvc.perform(post("/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"taken\",\"email\":\"a@b.com\",\"password\":\"p\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("bad_request"))
-                .andExpect(jsonPath("$.message").value("username already exists"));
-    }
+    // ---------- DELETE ACCOUNT ----------
 
     @Test
-    void register_invalidInput_returns400() throws Exception {
-        // This tests the @Valid constraints in your DTOs
-        mvc.perform(post("/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"\",\"email\":\"not-an-email\",\"password\":\"\"}"))
-                .andExpect(status().isBadRequest());
-    }
+    void deleteMe_returns204() throws Exception {
+        doNothing().when(users).deleteByUsername("z");
 
-    // Add these inside your UserControllerTest class
+        mvc.perform(delete("/users/me")
+                        .header("X-User", "z"))
+                .andExpect(status().isNoContent());
 
-    @Test
-    void register_invalidEmail_returns400() throws Exception {
-        // Tests the @Email and @NotBlank constraints in RegisterRequest
-        mvc.perform(post("/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"z\",\"email\":\"not-an-email\",\"password\":\"pw\"}"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void login_emptyFields_returns400() throws Exception {
-        // Tests the @NotBlank constraints in LoginRequest
-        mvc.perform(post("/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"\",\"password\":\"\"}"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateProfile_invalidEmail_returns400() throws Exception {
-        // Tests the @Email constraint in UpdateProfileRequest
-        mvc.perform(put("/users/me")
-                        .header("X-User", "z")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"invalid-email\"}"))
-                .andExpect(status().isBadRequest());
+        verify(users).deleteByUsername("z");
     }
 }

@@ -4,7 +4,6 @@ import com.collab.docservice.dto.DocEditMessage;
 import com.collab.docservice.model.Document;
 import com.collab.docservice.repo.DocumentRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -44,7 +43,7 @@ class DocRealtimeControllerTest {
     }
 
     @Test
-    void edit_savesContentToDatabase_andCallsVersionService() {
+    void edit_savesContentToDatabase_only() {
         DocumentRepository repo = mock(DocumentRepository.class);
         RestTemplate restTemplate = mock(RestTemplate.class);
 
@@ -59,8 +58,6 @@ class DocRealtimeControllerTest {
 
         when(repo.findById(docId)).thenReturn(Optional.of(d));
         when(repo.save(any(Document.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(restTemplate.postForEntity(anyString(), any(), eq(Object.class)))
-                .thenReturn(ResponseEntity.ok().build());
 
         DocEditMessage edit = new DocEditMessage();
         edit.type = "EDIT";
@@ -71,7 +68,10 @@ class DocRealtimeControllerTest {
 
         assertEquals("new content", d.getContent());
         verify(repo).save(d);
-        verify(restTemplate).postForEntity(contains("/api/versions"), any(), eq(Object.class));
+
+
+        verify(restTemplate, never()).postForEntity(anyString(), any(), eq(Object.class));
+        verifyNoMoreInteractions(restTemplate);
     }
 
     @Test
@@ -116,6 +116,9 @@ class DocRealtimeControllerTest {
 
         // Content should now be empty because the only user left
         assertEquals("", out.content);
+
+        verifyNoInteractions(repo);
+        verifyNoInteractions(restTemplate);
     }
 
     @Test
@@ -129,6 +132,7 @@ class DocRealtimeControllerTest {
         d.setContent("previous");
 
         when(repo.findById(docId)).thenReturn(Optional.of(d));
+        when(repo.save(any(Document.class))).thenAnswer(inv -> inv.getArgument(0));
 
         DocEditMessage edit = new DocEditMessage();
         edit.type = "EDIT";
@@ -139,5 +143,8 @@ class DocRealtimeControllerTest {
 
         assertEquals("", d.getContent());
         verify(repo).save(d);
+
+
+        verifyNoInteractions(restTemplate);
     }
 }
