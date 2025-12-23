@@ -113,3 +113,11 @@ export async function revokeDocumentAccess(token, docId, collaboratorUsername) {
     token,
   });
 }
+
+export async function deleteAccount(token) {
+  return request("/users/me", {
+    method: "DELETE",
+    token,
+  });
+}
+

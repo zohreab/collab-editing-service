@@ -18,3 +18,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+services:
+  docservice:
+    baseUrl: http://localhost:8082
+
+internal:
+  secret: INTERNAL_DELETE_SECRET_123

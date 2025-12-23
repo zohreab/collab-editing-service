@@ -76,5 +76,12 @@ public class UserService {
         return repo.existsByUsername(username);
     }
 
+    public void deleteByUsername(String username) {
+        User u = repo.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+        repo.delete(u);
+    }
+
+
 
 }

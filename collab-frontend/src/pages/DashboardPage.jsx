@@ -8,6 +8,7 @@ import {
   changePassword,
   deleteDocument,
   revokeDocumentAccess,
+  deleteAccount,
 } from "../Api";
 
 import Toast from "../Toast";
@@ -63,7 +64,7 @@ function Icon({ name, size = 18 }) {
   return null;
 }
 
-export default function DashboardPage({ auth }) {
+export default function DashboardPage({ auth, onLogout }) {
   const navigate = useNavigate();
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -195,6 +196,27 @@ export default function DashboardPage({ auth }) {
     });
   }
 
+  function requestDeleteAccount() {
+    openConfirm({
+      title: "Delete account?",
+      message:
+        "This will permanently delete your account and all documents you own (including their version history). This cannot be undone.",
+      danger: true,
+      onConfirm: async () => {
+        closeConfirm();
+
+        const res = await deleteAccount(auth.token);
+        if (res.ok) {
+          pushToast("Account deleted");
+          onLogout?.(); // clears auth + navigates to login (your App logout already does this)
+        } else {
+          pushToast(res.message || "Failed to delete account", "error");
+        }
+      },
+    });
+  }
+
+
   async function handleInvite() {
     if (!sharingDocId) return;
 
@@ -220,6 +242,7 @@ export default function DashboardPage({ auth }) {
 
   return (
     <>
+       
       {/* ✅ Toast Area */}
       <div className="toastWrap">
         {toasts.map((t) => (
@@ -471,7 +494,22 @@ export default function DashboardPage({ auth }) {
                     Logged in as: <b>{auth.username}</b>
                   </div>
                   <div className="small">Email: {auth.email || "No email linked"}</div>
+
+                  <div className="divider" style={{ margin: "16px 0" }} />
+
+                  <div className="small" style={{ marginBottom: 8, fontWeight: 800 }}>
+                    Danger zone
+                  </div>
+
+                  <button className="btn btnDanger" onClick={requestDeleteAccount}>
+                    Delete Account
+                  </button>
+
+                  <div className="small" style={{ marginTop: 8 }}>
+                    This deletes your user and all documents you own.
+                  </div>
                 </section>
+
               </>
             )}
           </div>

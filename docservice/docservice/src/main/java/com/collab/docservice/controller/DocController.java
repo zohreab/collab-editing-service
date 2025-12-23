@@ -14,6 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.collab.docservice.dto.VersionResponse;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.util.*;
 
@@ -29,6 +32,10 @@ public class DocController {
 
     @Value("${services.versionservice.baseUrl:http://localhost:8083}")
     private String versionserviceBaseUrl;
+
+    @Value("${internal.secret}")
+    private String internalSecret;
+
 
     public DocController(DocumentRepository repo, RestTemplate restTemplate) {
         this.repo = repo;
@@ -226,6 +233,31 @@ public class DocController {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Version service unavailable");
         }
     }
+
+    @DeleteMapping("/internal/owner/{username}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAllDocsOwnedBy(
+            @PathVariable String username,
+            @RequestHeader(value = "X-Internal-Secret", required = false) String secret
+    ) {
+        if (secret == null || !secret.equals(internalSecret)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
+        }
+
+        List<Document> owned = repo.findByOwnerUsername(username);
+
+        // Cleanup versions (best-effort) + delete docs
+        for (Document d : owned) {
+            try {
+                restTemplate.delete(versionserviceBaseUrl + "/api/versions/doc/" + d.getId());
+            } catch (Exception e) {
+                System.err.println("Version cleanup failed for doc " + d.getId() + ": " + e.getMessage());
+            }
+        }
+
+        repo.deleteAll(owned);
+    }
+
 
 
 

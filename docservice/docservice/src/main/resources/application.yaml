@@ -37,3 +37,6 @@ services:
     baseUrl: http://localhost:8081
   versionservice:
     baseUrl: http://localhost:8083
+
+internal:
+  secret: INTERNAL_DELETE_SECRET_123

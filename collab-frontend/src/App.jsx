@@ -58,7 +58,13 @@ export default function App() {
         <Route path="/" element={<Navigate to={auth ? "/dashboard" : "/login"} replace />} />
         <Route path="/register" element={auth ? <Navigate to="/dashboard" replace /> : <RegisterPage onDone={() => nav("/login")} />} />
         <Route path="/login" element={auth ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={(a) => { setAuth(a); nav("/dashboard"); }} />} />
-        <Route path="/dashboard" element={auth ? <DashboardPage auth={auth} /> : <Navigate to="/login" replace />} />
+        <Route
+          path="/dashboard"
+          element={
+            auth ? <DashboardPage auth={auth} onLogout={logout} /> : <Navigate to="/login" replace />
+          }
+        />
+
         <Route path="/edit/:id" element={auth ? <EditorPage auth={auth} /> : <Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

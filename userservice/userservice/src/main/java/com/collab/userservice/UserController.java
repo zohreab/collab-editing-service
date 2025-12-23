@@ -7,6 +7,11 @@ import com.collab.userservice.security.JwtUtils; // New Import
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
 import java.util.List;
@@ -18,10 +23,19 @@ public class UserController {
     private final UserService users;
     private final JwtUtils jwtUtils; // 1. Added JwtUtils field
 
+    private final RestTemplate restTemplate;
+
+    @Value("${services.docservice.baseUrl:http://localhost:8082}")
+    private String docserviceBaseUrl;
+
+    @Value("${internal.secret}")
+    private String internalSecret;
+
     // 2. Updated Constructor to inject JwtUtils
-    public UserController(UserService users, JwtUtils jwtUtils) {
+    public UserController(UserService users, JwtUtils jwtUtils, RestTemplate restTemplate) {
         this.users = users;
         this.jwtUtils = jwtUtils;
+        this.restTemplate = restTemplate;
     }
 
     @PostMapping("/register")
@@ -73,4 +87,32 @@ public class UserController {
         // This calls the fixed method in your UserService
         return users.exists(username);
     }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMe(@RequestHeader("X-User") String username) {
+
+        // 1) First delete docs owned by this user (call DocService internal endpoint)
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-Internal-Secret", internalSecret);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            restTemplate.exchange(
+                    docserviceBaseUrl + "/docs/internal/owner/" + username,
+                    HttpMethod.DELETE,
+                    entity,
+                    Void.class
+            );
+        } catch (Exception e) {
+            // Decide policy: strict or best-effort.
+            // I recommend STRICT for consistency:
+            throw new IllegalArgumentException("Failed to delete user's documents. User was not deleted.");
+        }
+
+        // 2) Then delete user
+        users.deleteByUsername(username);
+    }
+
 }

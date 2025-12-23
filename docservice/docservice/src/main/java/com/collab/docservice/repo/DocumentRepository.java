@@ -10,9 +10,10 @@ import java.util.UUID;
 
 public interface DocumentRepository extends JpaRepository<Document, UUID> {
 
-    // Find docs owned by user OR shared with user
     @Query("SELECT d FROM Document d LEFT JOIN d.collaborators c " +
             "WHERE d.ownerUsername = :username OR c = :username " +
             "ORDER BY d.updatedAt DESC")
     List<Document> findVisibleDocuments(@Param("username") String username);
+
+    List<Document> findByOwnerUsername(String ownerUsername);
 }
