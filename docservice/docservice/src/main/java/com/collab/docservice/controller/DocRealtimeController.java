@@ -52,8 +52,7 @@ public class DocRealtimeController {
                     doc.setContent(message.content == null ? "" : message.content);
                     repo.save(doc);
 
-                    // Save version snapshot (tracks contributions)
-                    saveVersionSnapshotSafe(docId, message.sender, doc.getContent());
+
                 });
             }
 

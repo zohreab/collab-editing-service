@@ -242,7 +242,7 @@ export default function DashboardPage({ auth, onLogout }) {
 
   return (
     <>
-       
+
       {/* ✅ Toast Area */}
       <div className="toastWrap">
         {toasts.map((t) => (

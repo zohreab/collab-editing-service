@@ -121,3 +121,11 @@ export async function deleteAccount(token) {
   });
 }
 
+export async function saveDocSnapshot(token, docId) {
+  return request(`/docs/${docId}/snapshot`, {
+    method: "POST",
+    token,
+  });
+}
+
+

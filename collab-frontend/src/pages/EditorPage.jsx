@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { API_BASE, getDocVersionHistory } from "../Api";
+import { API_BASE, getDocVersionHistory, saveDocSnapshot } from "../Api";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 import Toast from "../Toast";
@@ -60,6 +60,18 @@ export default function EditorPage({ auth }) {
       pushToast("Version restored");
     }
   }
+
+  async function handleSaveVersion() {
+  const res = await saveDocSnapshot(auth.token, id);
+  if (res.ok) {
+    pushToast("Version saved");
+    await loadHistory();
+    setShowHistory(true);
+  } else {
+    pushToast(res.message || "Failed to save version", "error");
+  }
+}
+
 
   useEffect(() => {
     fetch(`${API_BASE}/docs/${id}`, {
@@ -198,6 +210,10 @@ export default function EditorPage({ auth }) {
           </div>
 
           <div className="row">
+          <button className="btn btnPrimary" onClick={handleSaveVersion}>
+  Save Version
+</button>
+
             <button className="btn" onClick={loadHistory}>
               Refresh History
             </button>
